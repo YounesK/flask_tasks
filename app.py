@@ -16,6 +16,7 @@ def add():
     label = request.form.get('task')
     if label:
         tasks.append({'label': label, 'done': False})
+        print(tasks)
     return redirect(url_for('index'))
 
 @app.route('/toggle/<int:task_id>')

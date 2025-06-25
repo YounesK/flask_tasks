@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ma To-Do List</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .done { text-decoration: line-through; color: gray; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <h1>📝 Ma To-Do List</h1>
@@ -17,10 +14,10 @@
     </form>
 
     <ul>
-        {% for i, task in tasks %}
+        {% for task in tasks %}
             <li>
                 <form action="{{ url_for('toggle', task_id=loop.index0) }}" method="get" style="display:inline;">
-                    <button type="submit">
+                    <button type="submit" aria-label="Toggle task">
                         {% if task.done %}✅{% else %}⬜{% endif %}
                     </button>
                 </form>
