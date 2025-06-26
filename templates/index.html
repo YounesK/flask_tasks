@@ -8,7 +8,7 @@
 <body>
     <h1>📝 Ma To-Do List</h1>
 
-    <form action="{{ url_for('add') }}" method="post">
+    <form action="{{ url_for('add') }}" method="post" class="add-form">
         <input type="text" name="task" placeholder="Nouvelle tâche" required>
         <button type="submit">Ajouter</button>
     </form>
@@ -16,12 +16,10 @@
     <ul>
         {% for task in tasks %}
             <li>
-                <form action="{{ url_for('toggle', task_id=loop.index0) }}" method="get" style="display:inline;">
-                    <button type="submit" aria-label="Toggle task">
-                        {% if task.done %}✅{% else %}⬜{% endif %}
-                    </button>
+                <form action="{{ url_for('toggle', task_id=loop.index0) }}" method="post" style="display:inline;">
+                    <input type="checkbox" id="task{{ loop.index0 }}" name="done" onchange="this.form.submit()" {% if task.done %}checked{% endif %}>
+                    <label for="task{{ loop.index0 }}" class="{% if task.done %}done{% endif %}">{{ task.label }}</label>
                 </form>
-                <span class="{% if task.done %}done{% endif %}">{{ task.label }}</span>
             </li>
         {% endfor %}
     </ul>

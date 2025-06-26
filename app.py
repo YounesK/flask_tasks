@@ -1,10 +1,7 @@
-
-
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-# Liste des tâches : chaque tâche est un dictionnaire
 tasks = []
 
 @app.route('/')
@@ -16,10 +13,9 @@ def add():
     label = request.form.get('task')
     if label:
         tasks.append({'label': label, 'done': False})
-        print(tasks)
     return redirect(url_for('index'))
 
-@app.route('/toggle/<int:task_id>')
+@app.route('/toggle/<int:task_id>', methods=['POST'])
 def toggle(task_id):
     if 0 <= task_id < len(tasks):
         tasks[task_id]['done'] = not tasks[task_id]['done']

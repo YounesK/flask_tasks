@@ -8,15 +8,12 @@ body {
     color: gray;
 }
 
-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2em;
+.add-form input[type="text"] {
+    padding: 8px;
+    font-size: 1em;
 }
 
-/* Style spécifique pour le bouton d'ajout */
-button[type="submit"] {
+.add-form button {
     background-color: #007BFF;
     border: none;
     color: white;
@@ -26,6 +23,27 @@ button[type="submit"] {
     cursor: pointer;
 }
 
-button[type="submit"]:hover {
+.add-form button:hover {
     background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+li {
+    margin: 8px 0;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: gray; /* Change la couleur de la coche */
+}
+
+label {
+    margin-left: 8px;
+    cursor: pointer;
 }
