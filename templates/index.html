@@ -1,27 +1,227 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Ma To-Do List</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8" />
+    <title>To-Do & Pomodoro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 40px;
+            background: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        /* Section Pomodoro */
+        #pomodoro-timer {
+            width: 60%;
+            margin-bottom: 40px;
+            text-align: center;
+            background: #fff;
+            padding: 20px 0 30px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(217,83,79,0.08);
+        }
+        #pomodoro-timer label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        #pomodoro-duration {
+            width: 60px;
+            padding: 5px;
+            font-size: 1em;
+        }
+        #timer-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #d9534f;
+        }
+        #start-stop-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        #start-stop-btn:hover {
+            background: #c9302c;
+        }
+        /* Conteneur Pomodoro en cours */
+        #pomodoro-current {
+            background-color: #d9534f; /* rouge bootstrap */
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            width: 60%;
+            margin-bottom: 50px;
+            box-shadow: 0 4px 10px rgba(217, 83, 79, 0.5);
+        }
+        /* Tableau des tâches terminées */
+        #completed-tasks {
+            width: 60%;
+            border-collapse: collapse;
+            font-size: 1.1em;
+            color: #666;
+            font-style: italic;
+        }
+        #completed-tasks th, #completed-tasks td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        #completed-tasks th {
+            background-color: #eee;
+            font-weight: 600;
+        }
+        #completed-tasks tr:last-child td {
+            border-bottom: none;
+        }
+        /* Supprimer puces et marges */
+        ul, li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        /* Style pour la liste des tâches actives */
+        .task-list {
+            width: 60%;
+            margin-bottom: 40px;
+        }
+        .task-list h2 {
+            margin-top: 25px;
+            color: #d9534f;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(217,83,79,0.08);
+        }
+        .task-label {
+            font-size: 1.1em;
+        }
+        .delete-btn {
+            color: white;
+            background: #d9534f;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .delete-btn:hover {
+            background: #c9302c;
+        }
+        /* Formulaire d'ajout */
+        form.add-form {
+            margin-bottom: 30px;
+            width: 60%;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        form.add-form input, form.add-form button {
+            padding: 8px;
+            font-size: 1em;
+        }
+        form.add-form button {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form.add-form button:hover {
+            background: #449d44;
+        }
+    </style>
 </head>
 <body>
-    <h1>📝 Ma To-Do List</h1>
 
-    <form action="{{ url_for('add') }}" method="post" class="add-form">
-        <input type="text" name="task" placeholder="Nouvelle tâche" required>
+    <h1>Gestion des Tâches & Pomodoro</h1>
+
+    <!-- Section Pomodoro configurable -->
+    <div id="pomodoro-timer">
+        <label for="pomodoro-duration">Durée (minutes) :</label>
+        <input type="number" id="pomodoro-duration" min="1" max="60" value="25" />
+        <div id="timer-display">25:00</div>
+        <button id="start-stop-btn">Démarrer</button>
+    </div>
+
+    <!-- Formulaire d'ajout -->
+    <form class="add-form" action="{{ url_for('add') }}" method="post">
+        <input type="text" name="category" placeholder="Nouvelle catégorie" required />
+        <input type="text" name="task" placeholder="Nouvelle tâche" required />
         <button type="submit">Ajouter</button>
     </form>
 
-    <ul>
-        {% for task in tasks %}
-            <li>
-                <form action="{{ url_for('toggle', task_id=loop.index0) }}" method="post" style="display:inline;">
-                    <input type="checkbox" id="task{{ loop.index0 }}" name="done" onchange="this.form.submit()" {% if task.done %}checked{% endif %}>
-                    <label for="task{{ loop.index0 }}" class="{% if task.done %}done{% endif %}">{{ task.label }}</label>
-                </form>
-            </li>
+    <!-- Conteneur Pomodoro en cours (lié à la logique Flask) -->
+    {% if current_task %}
+    <div id="pomodoro-current">
+        Pomodoro en cours : {{ current_task.category.name }} - {{ current_task.label }}
+    </div>
+    {% else %}
+    <div id="pomodoro-current" style="background-color: #aaa; color: #fff;">
+        Aucun Pomodoro en cours
+    </div>
+    {% endif %}
+
+    <!-- Liste des tâches actives (non terminées) -->
+    <div class="task-list">
+        {% for category in categories %}
+            <h2>{{ category.name }}</h2>
+            <ul>
+                {% for task in category.tasks %}
+                    {% if not task.done %}
+                    <li class="task-item">
+                        <span class="task-label">{{ task.label }}</span>
+                        <form action="{{ url_for('delete_task', task_id=task.id) }}" method="post" style="margin:0;">
+                            <button type="submit" class="delete-btn">Supprimer</button>
+                        </form>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
         {% endfor %}
-    </ul>
+    </div>
+
+    <!-- Liste des tâches terminées -->
+    <table id="completed-tasks">
+        <thead>
+            <tr>
+                <th>Catégorie</th>
+                <th>Tâche terminée</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if completed_tasks %}
+                {% for cat_name, task_label in completed_tasks %}
+                <tr>
+                    <td>{{ cat_name }}</td>
+                    <td>{{ task_label }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="2" style="text-align:center; color:#999;">Aucune tâche terminée</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <script src="{{ url_for('static', filename='js/pomodoro.js') }}"></script>
 </body>
 </html>
